@@ -1,0 +1,15 @@
+- hosts: all
+  remote_user: root
+  gather_facts: false
+  tasks:
+  - name: Copy infra files
+    copy:
+      src: cloakmail_infra
+      dest: /root
+      owner: root
+  - name: Run infra services
+    docker_compose:
+      build: true
+      project_src: /root/cloakmail_infra
+      state: present
+  

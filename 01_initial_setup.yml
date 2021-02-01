@@ -1,0 +1,24 @@
+- hosts: all
+  remote_user: root
+  gather_facts: false
+  tasks:
+  - name: Install packages
+    apt:
+      name: 
+        - docker
+        - docker.io
+        - docker-compose
+        - jq
+        - htop
+      state: present
+      update_cache: yes
+  - name: Copy proxy files
+    copy:
+      src: proxy
+      dest: /root
+      owner: root
+  - name: Run proxy
+    docker_compose:
+      project_src: /root/proxy
+      state: present
+  
