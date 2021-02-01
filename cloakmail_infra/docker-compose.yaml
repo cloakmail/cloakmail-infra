@@ -18,12 +18,12 @@ services:
       DB_CONNECTION_URL: jdbc:postgresql://db:5432
     env_file:
       - .cloakmail.env
-    logging:
-      driver: aws
-      options:
-        awslogs-region: eu-central-1
-        awslogs-group: cloakmail
-        awslogs-create-group: "true"
+    # logging:
+    #   driver: aws
+    #   options:
+    #     awslogs-region: eu-central-1
+    #     awslogs-group: cloakmail
+    #     awslogs-create-group: "true"
     networks:
       - proxy_default
       - cloakmail
