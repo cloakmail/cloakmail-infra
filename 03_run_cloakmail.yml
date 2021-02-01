@@ -2,14 +2,15 @@
   remote_user: root
   gather_facts: false
   tasks:
-  - name: Copy proxy files
+  - name: Copy infra files
     copy:
-      src: proxy
+      src: cloakmail_infra
       dest: /srv/cloakmail
       mode: "770"
       group: appadmin
-  - name: Run proxy
+  - name: Run infra services
     docker_compose:
-      project_src: /srv/cloakmail/proxy
+      build: true
+      project_src: /srv/cloakmail/cloakmail_infra
       state: present
-      
+  

@@ -12,13 +12,25 @@
         - htop
       state: present
       update_cache: yes
-  - name: Copy proxy files
-    copy:
-      src: proxy
-      dest: /root
-      owner: root
-  - name: Run proxy
-    docker_compose:
-      project_src: /root/proxy
+  - name: Create appadmin group
+    group:
+      name: appadmin
       state: present
+  - name: Add the automation user
+    user:
+      name: automation
+      groups: docker,appadmin
+      comment: For CI/CD and infrastructure automation
+      shell: /bin/bash
+  - name: Allow SSH access for automation user
+    authorized_key:
+      user: automation
+      state: present
+      key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCXdd1mM0+xynLjXJ5TcaU1J1EKNYBMc0TzG2hWaHRufklMwLo4ZdaDyXjeEovWi84ZQGV0ldjni+D6doN2EvhSgeEumC2wW0nX98j/317m++jNfZpjIr3ut/P3+zfGPDJBa7xqzrLpEleU47iebo+Hm/sTuf50SqSt7sr5k33E15B4xil9TKuR/SF753OO1VnQqJh/a84QrC9IGJrOSrsxLCe1Qs1Rs98lMmuToGQ7C5ZRmrw7KGHVFecDcSvknZ9uOUwRqWDXebnTbCebVbyY2CJ6ZeIco4bYkioWZGU45xOAh4iLT5CHXmGWCYS5rU16JH1Jmajz4Zz8vdMBmCrehh3eN1sMgecu2r+VTVtlL2fQzPnSdl2994y6P4zhUJCTpzvChM0QkTE/4DR5+Wi+n+fUWUh0Ek2mjXduOGoie/yMBHH8yOzAM3GtzNnLTr/Z6IZEsvHz684wwTV3bEQ9YEYq/tIHLPszOpery6scDgppLhKCoGjYh8mb7FvFPY2dMqWIqvTgaC4hx55EBKrKvVkk4rpri5I2Hxrjlbr7K2+8KWI+Nw88gSZiPQthNeEVVsdy/krFWrdpYNr828Zqv9p8dXcTiF7aP9cSfmhZuRW2G0lxhUaTz3+B/SaCtjRjSw1GYZf2yd++KJvDV6+0jl/KvMS9D/1+A1vpfSQt7Q== automation
+  - name: Create deployment directory
+    file:
+      path: /srv/cloakmail"
+      state: directory
+      group: appadmin
+      mode: "770"
   
