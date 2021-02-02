@@ -6,10 +6,10 @@
     copy:
       src: proxy
       dest: /srv/cloakmail
-      mode: "770"
+      mode: preserve
       group: appadmin
+      owner: automation
   - name: Run proxy
     docker_compose:
       project_src: /srv/cloakmail/proxy
       state: present
-      

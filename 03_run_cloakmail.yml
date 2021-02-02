@@ -6,8 +6,9 @@
     copy:
       src: cloakmail_infra
       dest: /srv/cloakmail
-      mode: "770"
+      mode: preserve
       group: appadmin
+      owner: automation
   - name: Run infra services
     docker_compose:
       build: true
