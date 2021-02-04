@@ -1,5 +1,4 @@
 - hosts: all
-  remote_user: root
   gather_facts: false
   tasks:
   - name: Copy proxy files
@@ -8,7 +7,7 @@
       dest: /srv/cloakmail
       mode: preserve
       group: appadmin
-      owner: automation
+      directory_mode: "2770"
   - name: Run proxy
     docker_compose:
       project_src: /srv/cloakmail/proxy

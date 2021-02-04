@@ -1,5 +1,4 @@
 - hosts: all
-  remote_user: root
   gather_facts: false
   tasks:
   - name: Copy infra files
@@ -8,10 +7,9 @@
       dest: /srv/cloakmail
       mode: preserve
       group: appadmin
-      owner: automation
+      directory_mode: "2770"
   - name: Run infra services
     docker_compose:
-      build: true
       project_src: /srv/cloakmail/cloakmail_infra
       state: present
   

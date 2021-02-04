@@ -1,36 +1,99 @@
 - hosts: all
   remote_user: root
   gather_facts: false
+  vars:
+    users:
+    - name: david
+      groups: docker,appadmin
+      key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDGJXMAnZGc8+qZYm1Vb2ZyPsyKoweoqFQ0PBzkd1ZiioBWIK185zgV4VvVHruTc+xozFZPXacM0WAxBQ7CE2fyD9ssyDPA/bB+JQ4C572GV9MDA0mIsRUF3DxXbUB0ROmvQ6VDxqT+mUn1tDyLmxVqZAxSLEobgaWV7c5K8IPdF47RU7/elOWjTHssfsyghztbhr7LYlO5JJRGuK/kv40mVrQWGWrcHqNEgnJLuCC2I8OaZqzGNynL6gymTdYs/JtZahO/0E0SNct+dk+/eiVzkl9RzbBmAZXTKGOxG/qCF0G2SEQU7joDTwO6Ohc2hvdBe+g+uUWh/Mcpiq0+0EMIB5fiRSEJo1AAzphbp/zjUemAWzGcjo6Vt+6NgQm0BhU1L2mgptom44hVxtNbQebKnPk+6uB0addJf09LMQ+6qKJluGFefwTmpk5+yrXNhgfl5UP+i32X4XI6ofcF+lCsjK/MAml00LCWRFpfnw7NuWtKfmkd+blK5rgzWBL/zVyx2voBVRAOWu3ydid22j2AYzwSiG6KGdcZGweftm5meCsaZtbnwCTYCDhwvp2rie2SjfkGiimhGOT+vkXYa3XDO0I3L2kr110lqiVahjtjzArZK25qRcf2RmVtg4xxuekAfjDGPm5XWMiGDlVuP8uuknAuU6gP+/8Ig2UGpEBwZQ== david
+      sudo: true
+    - name: automation
+      groups: docker,appadmin
+      key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCXdd1mM0+xynLjXJ5TcaU1J1EKNYBMc0TzG2hWaHRufklMwLo4ZdaDyXjeEovWi84ZQGV0ldjni+D6doN2EvhSgeEumC2wW0nX98j/317m++jNfZpjIr3ut/P3+zfGPDJBa7xqzrLpEleU47iebo+Hm/sTuf50SqSt7sr5k33E15B4xil9TKuR/SF753OO1VnQqJh/a84QrC9IGJrOSrsxLCe1Qs1Rs98lMmuToGQ7C5ZRmrw7KGHVFecDcSvknZ9uOUwRqWDXebnTbCebVbyY2CJ6ZeIco4bYkioWZGU45xOAh4iLT5CHXmGWCYS5rU16JH1Jmajz4Zz8vdMBmCrehh3eN1sMgecu2r+VTVtlL2fQzPnSdl2994y6P4zhUJCTpzvChM0QkTE/4DR5+Wi+n+fUWUh0Ek2mjXduOGoie/yMBHH8yOzAM3GtzNnLTr/Z6IZEsvHz684wwTV3bEQ9YEYq/tIHLPszOpery6scDgppLhKCoGjYh8mb7FvFPY2dMqWIqvTgaC4hx55EBKrKvVkk4rpri5I2Hxrjlbr7K2+8KWI+Nw88gSZiPQthNeEVVsdy/krFWrdpYNr828Zqv9p8dXcTiF7aP9cSfmhZuRW2G0lxhUaTz3+B/SaCtjRjSw1GYZf2yd++KJvDV6+0jl/KvMS9D/1+A1vpfSQt7Q== automation
+      sudo: true
+  vars_files:
+    - secrets.yaml
+  handlers:
+  - name: Restart ssh
+    service: 
+      name: ssh 
+      state: restarted
   tasks:
   - name: Install packages
     apt:
-      name: 
+      name:
+        - ufw
+        - fail2ban
+        - vim
+        - htop
+        - jq
+        - unattended-upgrades
         - docker
         - docker.io
         - docker-compose
-        - jq
-        - htop
       state: present
       update_cache: yes
+      cache_valid_time: 3600
+  - name: Upgrade packages
+    apt:
+      upgrade: safe
+  - name: Adjust update intervals
+    copy: 
+      dest: /etc/apt/apt.conf.d/10periodic
+      content: |
+        APT::Periodic::Update-Package-Lists "1";
+        APT::Periodic::Download-Upgradeable-Packages "1";
+        APT::Periodic::AutocleanInterval "7";
+        APT::Periodic::Unattended-Upgrade "1";
+  - name: Setup firewall
+    ufw: 
+      state: enabled
+      policy: deny
+  - name: Open ports
+    ufw:
+      rule: allow
+      port: "{{ item }}"
+    loop: [ "22", "80", "443", "25", "587"]
+  - name: Disallow password authentication
+    lineinfile: 
+      dest: /etc/ssh/sshd_config
+      regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication no"
+      state: present
+    notify: Restart ssh
   - name: Create appadmin group
     group:
       name: appadmin
       state: present
-  - name: Add the automation user
+  - name: Add users
     user:
-      name: automation
-      groups: docker,appadmin
-      comment: For CI/CD and infrastructure automation
+      name: "{{ item.name }}"
+      groups: "{{ item.groups }}"
       shell: /bin/bash
-  - name: Allow SSH access for automation user
+    loop: "{{ users }}"
+  - name: Configure SSH access
     authorized_key:
-      user: automation
+      user: "{{ item.name}}"
+      key: "{{ item.key }}"
+    loop: "{{ users }}"
+  - name: Configure sudoers
+    lineinfile:
+      dest: /etc/sudoers
+      regexp: "{{ item.name }} ALL"
+      line: "{{ item.name }} ALL=(ALL) NOPASSWD:ALL"
       state: present
-      key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCXdd1mM0+xynLjXJ5TcaU1J1EKNYBMc0TzG2hWaHRufklMwLo4ZdaDyXjeEovWi84ZQGV0ldjni+D6doN2EvhSgeEumC2wW0nX98j/317m++jNfZpjIr3ut/P3+zfGPDJBa7xqzrLpEleU47iebo+Hm/sTuf50SqSt7sr5k33E15B4xil9TKuR/SF753OO1VnQqJh/a84QrC9IGJrOSrsxLCe1Qs1Rs98lMmuToGQ7C5ZRmrw7KGHVFecDcSvknZ9uOUwRqWDXebnTbCebVbyY2CJ6ZeIco4bYkioWZGU45xOAh4iLT5CHXmGWCYS5rU16JH1Jmajz4Zz8vdMBmCrehh3eN1sMgecu2r+VTVtlL2fQzPnSdl2994y6P4zhUJCTpzvChM0QkTE/4DR5+Wi+n+fUWUh0Ek2mjXduOGoie/yMBHH8yOzAM3GtzNnLTr/Z6IZEsvHz684wwTV3bEQ9YEYq/tIHLPszOpery6scDgppLhKCoGjYh8mb7FvFPY2dMqWIqvTgaC4hx55EBKrKvVkk4rpri5I2Hxrjlbr7K2+8KWI+Nw88gSZiPQthNeEVVsdy/krFWrdpYNr828Zqv9p8dXcTiF7aP9cSfmhZuRW2G0lxhUaTz3+B/SaCtjRjSw1GYZf2yd++KJvDV6+0jl/KvMS9D/1+A1vpfSQt7Q== automation
+    when: item.sudo
+    loop: "{{ users }}"
+  - name: Log users into Dockerhub
+    docker_login:
+      username: "{{ docker_username }}"
+      password: "{{ docker_password }}"
+    become_user: "{{ item.name }}"
+    loop: "{{ users }}"
   - name: Create deployment directory
     file:
-      path: /srv/cloakmail"
+      path: /srv/cloakmail
       state: directory
       group: appadmin
-      mode: "770"
+      mode: "2770"
   
