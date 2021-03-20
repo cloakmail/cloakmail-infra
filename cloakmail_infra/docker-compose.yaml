@@ -16,6 +16,7 @@ services:
       MODE: multiuser
       JWK_URI: https://auth.cloakmail.org/auth/realms/cloakmail/protocol/openid-connect/certs
       DB_CONNECTION_URL: jdbc:postgresql://db:5432
+      KEYCLOAK_BASE_URL: https://auth.cloakmail.org/auth
     env_file:
       - .cloakmail.env
     # logging:
