@@ -38,6 +38,11 @@ services:
       CONF_MYDOMAIN: cloakmail.org
       CONF_SMTP_ALWAYS_SEND_EHLO: 'yes'
 
+      ### Log to pg
+      POSTGRES_LOG_HOST: db
+      POSTGRES_LOG_DB: postgres
+      POSTGRES_LOG_TABLE: postfix_log
+
       ### Aliases
       POSTGRES_HOSTS: db
       POSTGRES_ALIAS_DB: postgres
