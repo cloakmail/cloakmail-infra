@@ -32,6 +32,8 @@ services:
   postfix:
     container_name: postfix
     image: dhet/postfix-pg:latest
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
     environment:
       CONF_SMTP_HELO_NAME: cloakmail.org
       CONF_MYHOSTNAME: mx.cloakmail.org
