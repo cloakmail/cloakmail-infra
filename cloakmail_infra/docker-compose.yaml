@@ -87,7 +87,7 @@ services:
       - cloakmail
 
   keycloak:
-    image: jboss/keycloak:12.0.1
+    image: dhet/cloakmail-keycloak:latest
     container_name: keycloak
     restart: always
     env_file:
