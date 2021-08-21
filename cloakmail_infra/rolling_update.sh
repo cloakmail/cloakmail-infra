@@ -10,7 +10,7 @@ if [ -z "$CONTAINER_NAME" ]; then
 fi
 
 PREVIOUS_CONTAINER=$(docker ps --format "table {{.ID}}  {{.Names}}  {{.CreatedAt}}" | grep "$CONTAINER_NAME" | awk -F  "  " '{print $1}')
-docker-compose pull "$CONTAINER_NAME"
+docker-compose pull -q "$CONTAINER_NAME"
 docker-compose up -d --no-deps --scale "$CONTAINER_NAME"=2 --no-recreate "$CONTAINER_NAME"
 sleep 60
 docker kill -s SIGTERM "$PREVIOUS_CONTAINER"
