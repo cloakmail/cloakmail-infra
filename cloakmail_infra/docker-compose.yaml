@@ -19,6 +19,10 @@ services:
       CLOAKMAIL_MODE: multiuser
       CLOAKMAIL_LOG_PROCESSING_ENABLED: "true"
       CLOAKMAIL_KEYCLOAK_BASE_URL: https://auth.cloakmail.org/auth
+      KEYCLOAK_ENABLED: "true"
+      KEYCLOAK_REALM: cloakmail
+      KEYCLOAK_AUTH_SERVER_URL: https://auth.cloakmail.org/auth
+      KEYCLOAK_RESOURCE: cloakmail-app
     env_file:
       - .cloakmail.env
     # logging:
