@@ -15,6 +15,10 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://auth.cloakmail.org/auth/realms/cloakmail/protocol/openid-connect/certs
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/
+      SPRING_MAIL_HOST: smtp.eu.mailgun.org
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       CLOAKMAIL_DOMAIN: cloakmail.org
       CLOAKMAIL_MODE: multiuser
       CLOAKMAIL_LOG_PROCESSING_ENABLED: "true"
