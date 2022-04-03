@@ -104,17 +104,16 @@ services:
     image: dhet/cloakmail-keycloak:latest
     container_name: keycloak
     restart: unless-stopped
+    command: start
     env_file:
       - .keycloak.env
     environment:
       VIRTUAL_HOST: auth.cloakmail.org
       VIRTUAL_PORT: 8080
       LETSENCRYPT_HOST: auth.cloakmail.org
-      DB_VENDOR: postgres
-      DB_ADDR: db
-      DB_PORT: 5432
-      DB_DATABASE: keycloak
-      PROXY_ADDRESS_FORWARDING: "true"
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_HOSTNAME: auth.cloakmail.org
+      KC_PROXY: edge
     depends_on:
       - db
     networks:
