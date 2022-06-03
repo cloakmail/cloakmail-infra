@@ -2,7 +2,7 @@ version: '3'
 
 services:
   proxy:
-    image: jwilder/nginx-proxy:alpine
+    image: jwilder/nginx-proxy:1.0-alpine
     restart: always
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
@@ -19,7 +19,7 @@ services:
       - default
 
   letsencrypt-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion:v1.12
+    image: nginxproxy/acme-companion:2.2
     restart: always
     environment:
       - DEFAULT_EMAIL=contact@cloakmail.org
@@ -34,7 +34,7 @@ services:
       - proxy
 
   watchtower:
-    image: containrrr/watchtower
+    image: containrrr/watchtower:1.4.0
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
